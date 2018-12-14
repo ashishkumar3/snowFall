@@ -6,6 +6,8 @@ class snowFlake{
     this.vy = 0;
     this.radius = 0;
     this.alpha = 0;
+    this.segmentLength = 0;
+    this.branchLength = 0;
 
     this.reset();
   }
@@ -17,6 +19,8 @@ class snowFlake{
     this.vy = this.randBetween(2, 5);
     this.radius = this.randBetween(1, 5);
     this.alpha = this.randBetween(0.1, 0.9);
+    this.segmentLength = this.randBetween(1.5, 2.5);
+    this.branchLength = this.randBetween(0, 2);
   }
   
   randBetween(min, max){
@@ -58,11 +62,28 @@ class Snow{
     }
   }
 
+  createVignette(){
+    const xMid = this.width/2;
+    const yMid = this.height/2;
+    const radius = Math.sqrt(xMid*xMid + yMid*yMid);
+    this.vignette = this.context.createRadialGradient(xMid, yMid, 0, xMid, yMid, radius);
+
+
+    this.vignette.addColorStop(0.49, `rgba(0, 0, 0, 0)`);
+    for(let i=0; i<=1; i+=0.1){
+      const alpha = Math.pow(i,3);
+      this.vignette.addColorStop(0.5+i*0.5, `rgba(0, 0, 0, ${alpha})`);
+    }
+  }
+
+
   onResize(){
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+
+    this.createVignette();
   }
 
   update(){
@@ -80,6 +101,9 @@ class Snow{
       this.context.fill();
       this.context.restore();
     }
+
+    this.context.fillStyle=this.vignette;
+    this.context.fillRect(0, 0, this.width, this.height);
 
     requestAnimationFrame(this.updateBound);
   }
